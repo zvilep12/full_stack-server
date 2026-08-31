@@ -22,6 +22,14 @@ const Order = sequelize.define('Order', {
       isIn: [['received', 'in_progress', 'ready', 'paid', 'cancelled']],
     },
   },
+  totalAmount: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    validate: {
+      min: 0,
+    },
+  },
   employeeId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -34,7 +42,7 @@ const Order = sequelize.define('Order', {
   },
   customerId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'People',
       key: 'id',

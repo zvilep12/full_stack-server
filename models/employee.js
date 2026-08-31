@@ -18,6 +18,11 @@ const Employee = sequelize.define('Employee', {
     allowNull: false,
     defaultValue: 'waiter',
   },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
   managerId: {
     type: DataTypes.INTEGER,
     allowNull: true,

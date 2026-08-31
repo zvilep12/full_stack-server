@@ -19,6 +19,14 @@ const Person = sequelize.define('Person', {
       isEmail: true,
     },
   },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   tableName: 'People',
   timestamps: true,

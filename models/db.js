@@ -5,7 +5,7 @@ import Person from './person.js';
 import Employee from './employee.js';
 import MenuItem from './menuItem.js';
 import Order from './order.js';
-import OrderItem from './order.js';
+import OrderItem from './orderItems.js';
 
 // 2. הגדרת הקשרים (Associations)
 

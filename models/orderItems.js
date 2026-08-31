@@ -30,6 +30,14 @@ const OrderItem = sequelize.define('OrderItem', {
       min: 1,
     },
   },
+  priceAtOrder: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  notes: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   tableName: 'OrderItems',
   timestamps: true,
