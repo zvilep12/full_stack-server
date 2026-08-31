@@ -5,6 +5,7 @@ import employeeRouter from './routes/employeeRoutes.js';
 import customerRouter from './routes/customerRoutes.js';
 import menuRouter from './routes/menuRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
+import authRouter from './routes/authRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/auth', authRouter);
 app.use('/employees', employeeRouter);
 app.use('/customers', customerRouter);
 app.use('/menu', menuRouter);

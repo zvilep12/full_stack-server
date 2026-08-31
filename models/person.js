@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
+import bcrypt from 'bcryptjs';
 
 const Person = sequelize.define('Person', {
   id: {
@@ -30,6 +31,13 @@ const Person = sequelize.define('Person', {
 }, {
   tableName: 'People',
   timestamps: true,
+});
+
+Person.beforeSave(async (person) => {
+  if (person.changed('password') && person.password) {
+    const salt = await bcrypt.genSalt(10);
+    person.password = await bcrypt.hash(person.password, salt);
+  }
 });
 
 export default Person;

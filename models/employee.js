@@ -23,6 +23,14 @@ const Employee = sequelize.define('Employee', {
     allowNull: false,
     defaultValue: true,
   },
+  otpCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  otpExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   managerId: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -31,7 +39,7 @@ const Employee = sequelize.define('Employee', {
       key: 'peopleId',
     },
     onUpdate: 'CASCADE',
-    onDelete: 'SET NULL', // אם מנהל נמחק, העובדים תחתיו לא יימחקו אלא השדה יתאפס
+    onDelete: 'SET NULL',
   },
 }, {
   tableName: 'Employees',

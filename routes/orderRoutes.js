@@ -10,18 +10,18 @@ import {
   updateOrderItem,
   deleteOrderItem
 } from '../controllers/orderController.js';
+import { authenticateJWT } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', createOrder);
-router.get('/', getAllOrders);
-router.get('/customer/name/:name', getOrdersByCustomerName);
-router.post('/:id/items', addOrderItem);
-router.put('/:id/items/:menuItemId', updateOrderItem);
-router.delete('/:id/items/:menuItemId', deleteOrderItem);
-router.get('/:id', getOrderById);
-router.put('/:id', updateOrderStatus);
-router.delete('/:id', deleteOrder);
+router.post('/', authenticateJWT, createOrder);
+router.get('/', authenticateJWT, getAllOrders);
+router.get('/customer/name/:name', authenticateJWT, getOrdersByCustomerName);
+router.post('/:id/items', authenticateJWT, addOrderItem);
+router.put('/:id/items/:menuItemId', authenticateJWT, updateOrderItem);
+router.delete('/:id/items/:menuItemId', authenticateJWT, deleteOrderItem);
+router.get('/:id', authenticateJWT, getOrderById);
+router.put('/:id', authenticateJWT, updateOrderStatus);
+router.delete('/:id', authenticateJWT, deleteOrder);
 
 export default router;
-

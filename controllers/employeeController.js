@@ -8,8 +8,9 @@ export const createEmployee = async (req, res) => {
     const { id, name, email, role, managerId, phone, password } = req.body;
 
     // Basic validation
-    if (!id || !name || !email) {
-      return res.status(400).json({ error: 'id, name, and email are required fields.' });
+    if (!id || !name || !email || !password) {
+      await t.rollback();
+      return res.status(400).json({ error: 'id, name, email, and password are required fields.' });
     }
 
     // Check if Person already exists
