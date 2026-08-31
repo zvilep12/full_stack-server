@@ -1,483 +1,299 @@
-# Restaurant API Request Guide
+# Restaurant API Reference (Thunder Client / REST Client Guide)
 
-This file contains sample HTTP requests (cURL, PowerShell, and HTTP Client format) for every endpoint in the restaurant management system.
+This guide documents all available API endpoints, their HTTP methods, required headers, URL parameters, and JSON request bodies. Use this reference to set up your requests in Thunder Client.
 
-**Base URL:** `http://localhost:3000`
+**Base URL:** `http://localhost:3000`  
+**Default Header for all POST/PUT requests:** `Content-Type: application/json`
 
 ---
 
 ## 1. Employees Module (`/employees`)
 
 ### Create Employee (Register)
-* **HTTP:**
-  ```http
-  POST http://localhost:3000/employees HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `POST`
+* **Path:** `/employees`
+* **Description:** Transactionally creates a new person and registers them as an employee.
+* **Body (JSON):**
+  ```json
   {
-    "id": 101010,
-    "name": "Waiter John",
-    "email": "john@restaurant.com",
-    "phone": "050-1111111",
-    "role": "waiter"
+    "id": 101010,            // Integer (Required) - National Identity Number
+    "name": "Waiter John",   // String (Required) - Full name
+    "email": "john@test.com",// String (Required) - Unique email address
+    "phone": "050-1111111",  // String (Optional) - Phone number
+    "role": "waiter",        // String (Optional) - e.g., "waiter", "chef", "manager"
+    "managerId": null        // Integer (Optional) - ID of supervisor employee (or null)
   }
   ```
-* **cURL:**
-  ```bash
-  curl -X POST http://localhost:3000/employees \
-       -H "Content-Type: application/json" \
-       -d '{"id": 101010, "name": "Waiter John", "email": "john@restaurant.com", "phone": "050-1111111", "role": "waiter"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/employees" -Method Post -ContentType "application/json" -Body '{"id": 101010, "name": "Waiter John", "email": "john@restaurant.com", "phone": "050-1111111", "role": "waiter"}'
-  ```
 
-### Get All Employees (with optional filters)
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/employees?role=waiter&isActive=true HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET "http://localhost:3000/employees?role=waiter&isActive=true"
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/employees?role=waiter&isActive=true" -Method Get
-  ```
+### Get All Employees
+* **Method:** `GET`
+* **Path:** `/employees`
+* **Description:** Retrieves all employees.
+* **Query Parameters (Optional):**
+  * `role` (e.g. `?role=waiter`) - Filter by employee role.
+  * `isActive` (e.g. `?isActive=true` or `?isActive=false`) - Filter by active status.
 
 ### Search Employees by Name
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/employees/name/John HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/employees/name/John
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/employees/name/John" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/employees/name/:name`
+* **Description:** Case-insensitive partial matching search for employees.
+* **Path Parameter:**
+  * `:name` (e.g. `/employees/name/john`) - The search term.
 
 ### Get Employee by ID
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/employees/101010 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/employees/101010
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/employees/101010" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/employees/:id`
+* **Description:** Retrieves an employee's profile, including their subordinates (if manager) and direct supervisor.
+* **Path Parameter:**
+  * `:id` (e.g. `/employees/101010`) - Employee ID.
 
 ### Update Employee
-* **HTTP:**
-  ```http
-  PUT http://localhost:3000/employees/101010 HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `PUT`
+* **Path:** `/employees/:id`
+* **Description:** Updates personal and employee fields.
+* **Path Parameter:**
+  * `:id` (e.g. `/employees/101010`) - Employee ID.
+* **Body (JSON - All fields optional):**
+  ```json
   {
-    "phone": "050-9999999",
-    "isActive": true
+    "name": "John S. Doe",
+    "email": "johndoe@test.com",
+    "phone": "050-2222222",
+    "role": "manager",
+    "isActive": false,
+    "managerId": 202020
   }
-  ```
-* **cURL:**
-  ```bash
-  curl -X PUT http://localhost:3000/employees/101010 \
-       -H "Content-Type: application/json" \
-       -d '{"phone": "050-9999999", "isActive": true}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/employees/101010" -Method Put -ContentType "application/json" -Body '{"phone": "050-9999999", "isActive": true}'
   ```
 
 ### Delete Employee
-* **HTTP:**
-  ```http
-  DELETE http://localhost:3000/employees/101010 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X DELETE http://localhost:3000/employees/101010
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/employees/101010" -Method Delete
-  ```
+* **Method:** `DELETE`
+* **Path:** `/employees/:id`
+* **Description:** Deletes the employee. (Will fail if they are associated with orders; set `isActive: false` instead).
+* **Path Parameter:**
+  * `:id` (e.g. `/employees/101010`) - Employee ID.
 
 ---
 
 ## 2. Customers Module (`/customers`)
 
 ### Create Customer
-* **HTTP:**
-  ```http
-  POST http://localhost:3000/customers HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `POST`
+* **Path:** `/customers`
+* **Description:** Registers a new customer in the personal database.
+* **Body (JSON):**
+  ```json
   {
-    "id": 202020,
-    "name": "Alice Smith",
-    "email": "alice@gmail.com",
-    "phone": "054-2222222"
+    "id": 303030,             // Integer (Required) - National Identity Number
+    "name": "Alice Smith",    // String (Required) - Full name
+    "email": "alice@gmail.com",// String (Required) - Unique email address
+    "phone": "054-3333333"    // String (Optional) - Phone number
   }
-  ```
-* **cURL:**
-  ```bash
-  curl -X POST http://localhost:3000/customers \
-       -H "Content-Type: application/json" \
-       -d '{"id": 202020, "name": "Alice Smith", "email": "alice@gmail.com", "phone": "054-2222222"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/customers" -Method Post -ContentType "application/json" -Body '{"id": 202020, "name": "Alice Smith", "email": "alice@gmail.com", "phone": "054-2222222"}'
   ```
 
 ### Get All Customers
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/customers HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/customers
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/customers" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/customers`
+* **Description:** Retrieves all people who are strictly customers (not employees).
 
 ### Search Customers by Name
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/customers/name/Alice HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/customers/name/Alice
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/customers/name/Alice" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/customers/name/:name`
+* **Description:** Case-insensitive partial matching search for customers.
+* **Path Parameter:**
+  * `:name` (e.g. `/customers/name/alice`) - The search term.
 
-### Get Customer by ID (with Order history)
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/customers/202020 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/customers/202020
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/customers/202020" -Method Get
-  ```
+### Get Customer by ID
+* **Method:** `GET`
+* **Path:** `/customers/:id`
+* **Description:** Retrieves a customer profile along with their order history.
+* **Path Parameter:**
+  * `:id` (e.g. `/customers/303030`) - Customer ID.
 
 ### Update Customer
-* **HTTP:**
-  ```http
-  PUT http://localhost:3000/customers/202020 HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `PUT`
+* **Path:** `/customers/:id`
+* **Description:** Updates customer personal details.
+* **Path Parameter:**
+  * `:id` (e.g. `/customers/303030`) - Customer ID.
+* **Body (JSON - All fields optional):**
+  ```json
   {
-    "name": "Alice S. Miller"
+    "name": "Alice S. Miller",
+    "email": "alice.miller@gmail.com",
+    "phone": "054-9999999"
   }
-  ```
-* **cURL:**
-  ```bash
-  curl -X PUT http://localhost:3000/customers/202020 \
-       -H "Content-Type: application/json" \
-       -d '{"name": "Alice S. Miller"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/customers/202020" -Method Put -ContentType "application/json" -Body '{"name": "Alice S. Miller"}'
   ```
 
 ### Delete Customer
-* **HTTP:**
-  ```http
-  DELETE http://localhost:3000/customers/202020 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X DELETE http://localhost:3000/customers/202020
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/customers/202020" -Method Delete
-  ```
+* **Method:** `DELETE`
+* **Path:** `/customers/:id`
+* **Description:** Deletes customer. Associated orders remain, but their `customerId` is set to `null`.
+* **Path Parameter:**
+  * `:id` (e.g. `/customers/303030`) - Customer ID.
 
 ---
 
 ## 3. Menu Items Module (`/menu`)
 
 ### Create Menu Item
-* **HTTP:**
-  ```http
-  POST http://localhost:3000/menu HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `POST`
+* **Path:** `/menu`
+* **Description:** Creates a new dish or drink on the menu.
+* **Body (JSON):**
+  ```json
   {
-    "name": "Classic Burger",
-    "price": 55,
-    "category": "Mains",
-    "description": "Juicy beef patty with lettuce and tomato"
+    "name": "Tasty Burger",   // String (Required) - Unique dish name
+    "price": 60,              // Integer (Required) - Dish price (must be >= 0)
+    "category": "Mains",      // String (Required) - Category (e.g. "Mains", "Drinks")
+    "description": "Beef patty"// String (Optional) - Description
   }
   ```
-* **cURL:**
-  ```bash
-  curl -X POST http://localhost:3000/menu \
-       -H "Content-Type: application/json" \
-       -d '{"name": "Classic Burger", "price": 55, "category": "Mains", "description": "Juicy beef patty with lettuce and tomato"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/menu" -Method Post -ContentType "application/json" -Body '{"name": "Classic Burger", "price": 55, "category": "Mains", "description": "Juicy beef patty with lettuce and tomato"}'
-  ```
 
-### Get Menu Items (with optional filters)
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/menu?category=Mains&isAvailable=true HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET "http://localhost:3000/menu?category=Mains&isAvailable=true"
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/menu?category=Mains&isAvailable=true" -Method Get
-  ```
+### Get All Menu Items
+* **Method:** `GET`
+* **Path:** `/menu`
+* **Description:** Retrieves menu items.
+* **Query Parameters (Optional):**
+  * `category` (e.g. `?category=Mains`) - Filter by category.
+  * `isAvailable` (e.g. `?isAvailable=true` or `?isAvailable=false`) - Filter by availability.
 
 ### Search Menu Items by Name
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/menu/name/Burger HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/menu/name/Burger
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/menu/name/Burger" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/menu/name/:name`
+* **Description:** Case-insensitive partial matching search for dishes.
+* **Path Parameter:**
+  * `:name` (e.g. `/menu/name/burger`) - The search term.
 
 ### Update Menu Item
-* **HTTP:**
-  ```http
-  PUT http://localhost:3000/menu/1 HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `PUT`
+* **Path:** `/menu/:id`
+* **Description:** Updates dish pricing, category, descriptions, or availability.
+* **Path Parameter:**
+  * `:id` (e.g. `/menu/1`) - Menu Item ID.
+* **Body (JSON - All fields optional):**
+  ```json
   {
-    "price": 58,
-    "isAvailable": false
+    "name": "Spicy Burger",
+    "price": 65,
+    "category": "Mains",
+    "description": "Spicy beef patty",
+    "isAvailable": true
   }
-  ```
-* **cURL:**
-  ```bash
-  curl -X PUT http://localhost:3000/menu/1 \
-       -H "Content-Type: application/json" \
-       -d '{"price": 58, "isAvailable": false}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/menu/1" -Method Put -ContentType "application/json" -Body '{"price": 58, "isAvailable": false}'
   ```
 
 ### Delete Menu Item
-* **HTTP:**
-  ```http
-  DELETE http://localhost:3000/menu/1 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X DELETE http://localhost:3000/menu/1
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/menu/1" -Method Delete
-  ```
+* **Method:** `DELETE`
+* **Path:** `/menu/:id`
+* **Description:** Deletes the menu item. (Will fail if the item was ordered in past orders; set `isAvailable: false` instead).
+* **Path Parameter:**
+  * `:id` (e.g. `/menu/1`) - Menu Item ID.
 
 ---
 
 ## 4. Orders Module (`/orders`)
 
-### Create Order (Open Order for Table)
-* **HTTP:**
-  ```http
-  POST http://localhost:3000/orders HTTP/1.1
-  Content-Type: application/json
-
+### Create Order (Open Order)
+* **Method:** `POST`
+* **Path:** `/orders`
+* **Description:** Opens a new order for a table, calculates the total amount, and records item details inside a transaction.
+* **Body (JSON):**
+  ```json
   {
-    "tableNumber": 8,
-    "employeeId": 101010,
-    "customerId": 202020,
-    "items": [
+    "tableNumber": 5,          // Integer (Required) - Table number (must be >= 1)
+    "employeeId": 101010,      // Integer (Required) - ID of waiter (must be active)
+    "customerId": 303030,      // Integer (Optional) - ID of customer (must not be employee)
+    "items": [                 // Array (Required) - Non-empty array of dishes
       {
-        "menuItemId": 1,
-        "quantity": 2,
-        "notes": "no pickles"
+        "menuItemId": 1,       // Integer (Required) - Dish ID (must be available)
+        "quantity": 2,         // Integer (Required) - Quantity (must be >= 1)
+        "notes": "no onions"   // String (Optional) - Specific instructions
       }
     ]
   }
   ```
-* **cURL:**
-  ```bash
-  curl -X POST http://localhost:3000/orders \
-       -H "Content-Type: application/json" \
-       -d '{"tableNumber": 8, "employeeId": 101010, "customerId": 202020, "items": [{"menuItemId": 1, "quantity": 2, "notes": "no pickles"}]}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders" -Method Post -ContentType "application/json" -Body '{"tableNumber": 8, "employeeId": 101010, "customerId": 202020, "items": [{"menuItemId": 1, "quantity": 2, "notes": "no pickles"}]}'
-  ```
 
-### Get All Orders (with optional filters)
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/orders?status=received&tableNumber=8 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET "http://localhost:3000/orders?status=received&tableNumber=8"
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders?status=received&tableNumber=8" -Method Get
-  ```
+### Get All Orders
+* **Method:** `GET`
+* **Path:** `/orders`
+* **Description:** Retrieves all orders.
+* **Query Parameters (Optional):**
+  * `status` (e.g. `?status=received`) - Filter by status (`received`, `in_progress`, `ready`, `paid`, `cancelled`).
+  * `tableNumber` (e.g. `?tableNumber=5`) - Filter by dining table.
 
 ### Search Orders by Customer Name
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/orders/customer/name/Alice HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/orders/customer/name/Alice
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/customer/name/Alice" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/orders/customer/name/:name`
+* **Description:** Search for orders by customer name.
+* **Path Parameter:**
+  * `:name` (e.g. `/orders/customer/name/alice`) - Customer name.
 
 ### Get Order by ID
-* **HTTP:**
-  ```http
-  GET http://localhost:3000/orders/1 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X GET http://localhost:3000/orders/1
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/1" -Method Get
-  ```
+* **Method:** `GET`
+* **Path:** `/orders/:id`
+* **Description:** Retrieves full order details including waiter profile, customer profile, and nested items (with quantities, snapshot prices, and notes).
+* **Path Parameter:**
+  * `:id` (e.g. `/orders/1`) - Order ID.
 
 ### Update Order Status
-* **HTTP:**
-  ```http
-  PUT http://localhost:3000/orders/1 HTTP/1.1
-  Content-Type: application/json
-
+* **Method:** `PUT`
+* **Path:** `/orders/:id`
+* **Description:** Updates the state of an order.
+* **Path Parameter:**
+  * `:id` (e.g. `/orders/1`) - Order ID.
+* **Body (JSON):**
+  ```json
   {
-    "status": "paid"
+    "status": "paid"           // String (Required) - "received", "in_progress", "ready", "paid", "cancelled"
   }
   ```
-* **cURL:**
-  ```bash
-  curl -X PUT http://localhost:3000/orders/1 \
-       -H "Content-Type: application/json" \
-       -d '{"status": "paid"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/1" -Method Put -ContentType "application/json" -Body '{"status": "paid"}'
-  ```
 
-### Delete Order
-* **HTTP:**
-  ```http
-  DELETE http://localhost:3000/orders/1 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X DELETE http://localhost:3000/orders/1
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/1" -Method Delete
-  ```
+### Delete Order (Cancel)
+* **Method:** `DELETE`
+* **Path:** `/orders/:id`
+* **Description:** Deletes the order and automatically cascades to delete all linked items.
+* **Path Parameter:**
+  * `:id` (e.g. `/orders/1`) - Order ID.
 
 ---
 
 ## 5. Order Items Nested Endpoints (`/orders/:id/items`)
 
-### Add Dish to Order (or increase quantity)
-* **HTTP:**
-  ```http
-  POST http://localhost:3000/orders/1/items HTTP/1.1
-  Content-Type: application/json
+*Note: Modifying items is only allowed on active orders (status is not 'paid' or 'cancelled').*
 
+### Add Dish to Order
+* **Method:** `POST`
+* **Path:** `/orders/:id/items`
+* **Description:** Appends a new dish to an active order. If the dish already exists in the order, it increases the quantity. Automatically updates the order's `totalAmount`.
+* **Path Parameter:**
+  * `:id` (e.g. `/orders/1`) - Order ID.
+* **Body (JSON):**
+  ```json
   {
-    "menuItemId": 2,
-    "quantity": 1,
-    "notes": "extra ice"
+    "menuItemId": 2,           // Integer (Required) - Menu item ID (must be available)
+    "quantity": 1,             // Integer (Required) - Quantity to add
+    "notes": "extra sauce"     // String (Optional) - Special instructions
   }
   ```
-* **cURL:**
-  ```bash
-  curl -X POST http://localhost:3000/orders/1/items \
-       -H "Content-Type: application/json" \
-       -d '{"menuItemId": 2, "quantity": 1, "notes": "extra ice"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/1/items" -Method Post -ContentType "application/json" -Body '{"menuItemId": 2, "quantity": 1, "notes": "extra ice"}'
-  ```
 
-### Update Dish in Order (quantity or notes)
-* **HTTP:**
-  ```http
-  PUT http://localhost:3000/orders/1/items/2 HTTP/1.1
-  Content-Type: application/json
-
+### Update Dish in Order
+* **Method:** `PUT`
+* **Path:** `/orders/:id/items/:menuItemId`
+* **Description:** Updates the quantity or notes of a specific dish in an order. Automatically adjusts the order's `totalAmount`.
+* **Path Parameters:**
+  * `:id` (e.g. `/orders/1`) - Order ID.
+  * `:menuItemId` (e.g. `/orders/1/items/2`) - Menu Item ID.
+* **Body (JSON - At least one is required):**
+  ```json
   {
-    "quantity": 3,
-    "notes": "no lemon"
+    "quantity": 3,             // Integer (Optional) - New quantity (must be >= 1)
+    "notes": "no onions"       // String (Optional) - New instructions
   }
-  ```
-* **cURL:**
-  ```bash
-  curl -X PUT http://localhost:3000/orders/1/items/2 \
-       -H "Content-Type: application/json" \
-       -d '{"quantity": 3, "notes": "no lemon"}'
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/1/items/2" -Method Put -ContentType "application/json" -Body '{"quantity": 3, "notes": "no lemon"}'
   ```
 
 ### Remove Dish from Order
-* **HTTP:**
-  ```http
-  DELETE http://localhost:3000/orders/1/items/2 HTTP/1.1
-  ```
-* **cURL:**
-  ```bash
-  curl -X DELETE http://localhost:3000/orders/1/items/2
-  ```
-* **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:3000/orders/1/items/2" -Method Delete
-  ```
+* **Method:** `DELETE`
+* **Path:** `/orders/:id/items/:menuItemId`
+* **Description:** Completely removes a dish from the order and deducts its cost from `totalAmount`.
+* **Path Parameters:**
+  * `:id` (e.g. `/orders/1`) - Order ID.
+  * `:menuItemId` (e.g. `/orders/1/items/2`) - Menu Item ID.
