@@ -19,7 +19,16 @@ app.use('/auth', authRouter);
 app.use('/employees', employeeRouter);
 app.use('/customers', customerRouter);
 app.use('/menu', menuRouter);
-app.use('/orders', orderRouter);
+// Error handling middleware (e.g. for malformed JSON)
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({
+      error: 'Invalid JSON format in request body. Please ensure your JSON is valid (no extra quotes or backslashes).',
+      message: err.message
+    });
+  }
+  res.status(500).json({ error: err.message || 'Internal server error' });
+});
 
 // Database Connection, Sync, and Server Listen
 try {

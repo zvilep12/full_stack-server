@@ -7,6 +7,41 @@ This guide documents all available API endpoints, their HTTP methods, required h
 
 ---
 
+## 0. Authentication Module (`/auth`)
+
+### Step 1: Login Request
+* **Method:** `POST`
+* **Path:** `/auth/login`
+* **URL:** `http://localhost:3000/auth/login`
+* **Header:** `Content-Type: application/json`
+* **Description:** Checks employee credentials and dispatches a 6-digit verification code to their email. Supports email, username, or national ID as identifier.
+* **Body (JSON):**
+  ```json
+  {
+    "email": "zvilep123@gmail.com",
+    "password": "yourPasswordHere"
+  }
+  ```
+  *(Note: You can also use `"username": "tzvi"` or `"id": 328441226` instead of `"email"`!)*
+* **Response:** Returns `tempToken`.
+
+### Step 2: Two-Step Verification (OTP)
+* **Method:** `POST`
+* **Path:** `/auth/verify`
+* **URL:** `http://localhost:3000/auth/verify`
+* **Header:** `Content-Type: application/json`
+* **Description:** Submits the 6-digit code received by email along with the temporary token to issue the final session token.
+* **Body (JSON):**
+  ```json
+  {
+    "tempToken": "PASTE_TEMP_TOKEN_FROM_STEP_1_HERE",
+    "code": "123456"
+  }
+  ```
+* **Response:** Returns the official session `token` (valid for 8 hours).
+
+---
+
 ## 1. Employees Module (`/employees`)
 
 ### Create Employee (Register)

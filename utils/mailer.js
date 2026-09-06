@@ -15,18 +15,32 @@ export const sendOTPEmail = async (toEmail, code) => {
   const secure = process.env.SMTP_SECURE === 'true'; // true for port 465, false for others
 
   const mailOptions = {
-    from: `"Restaurant System" <${user || 'no-reply@restaurant.com'}>`,
+    from: `"Munch Time Security" <${user || 'no-reply@restaurant.com'}>`,
     to: toEmail,
-    subject: 'Two-Step Verification Code',
-    text: `Your verification code is: ${code}. It will expire in 5 minutes.`,
+    subject: 'קוד אימות דו-שלבי - Munch Time',
+    text: `קוד האימות שלך הוא: ${code}. הוא תקף ל-5 דקות בלבד.`,
     html: `
-      <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 5px; max-width: 500px;">
-        <h2 style="color: #333;">Restaurant Management Security</h2>
-        <p>You requested a login. Please enter the following code to complete your two-step verification:</p>
-        <div style="font-size: 24px; font-weight: bold; background: #f4f4f4; padding: 10px; text-align: center; border-radius: 4px; letter-spacing: 2px; color: #007bff; margin: 20px 0;">
+      <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #0d0d0d; border: 3px solid #D4AF37; border-radius: 12px; max-width: 480px; margin: 20px auto; color: #ffffff; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);">
+        <div style="margin-bottom: 25px;">
+          <span style="font-size: 32px; font-weight: bold; color: #D4AF37; letter-spacing: 2px; text-transform: uppercase;">MUNCH TIME</span>
+          <div style="width: 80px; height: 2px; background-color: #D4AF37; margin: 10px auto;"></div>
+        </div>
+        
+        <h3 style="color: #ffffff; font-size: 22px; margin-top: 0; font-weight: 600; letter-spacing: 0.5px;">קוד אימות כניסה</h3>
+        
+        <p style="color: #b3b3b3; font-size: 15px; line-height: 1.6; margin: 20px 0;">
+          שלום,<br>
+          על מנת להשלים את ההתחברות למערכת Munch Time, אנא הזן את קוד האימות החד-פעמי הבא:
+        </p>
+        
+        <div style="font-size: 42px; font-weight: bold; background-color: #000000; color: #D4AF37; border: 2px solid #D4AF37; padding: 15px 0; text-align: center; border-radius: 8px; letter-spacing: 8px; margin: 30px auto; width: 75%; box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.2), 0 4px 15px rgba(0, 0, 0, 0.5);">
           ${code}
         </div>
-        <p style="color: #666; font-size: 12px;">This code will expire in 5 minutes. If you did not request this, please ignore this email.</p>
+        
+        <p style="color: #777777; font-size: 12px; line-height: 1.6; margin-top: 30px; border-top: 1px solid #222222; padding-top: 20px;">
+          * קוד זה יהיה בתוקף למשך 5 דקות בלבד.<br>
+          אם לא ניסית להתחבר למערכת, ניתן להתעלם מהודעה זו בבטחה.
+        </p>
       </div>
     `
   };

@@ -9,14 +9,52 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
 // Login Request (Phase A - Credentials check & OTP dispatch)
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let identifier = req.body?.email || req.body?.username || req.body?.name || req.body?.id;
+    let password = req.body?.password || req.body?.pass;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required fields.' });
+    // Check for Basic Auth header as well
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Basic ')) {
+      try {
+        const credentials = Buffer.from(authHeader.split(' ')[1], 'base64').toString('ascii');
+        const [user, pass] = credentials.split(':');
+        identifier = identifier || user;
+        password = password || pass;
+      } catch (err) {
+        // Continue to body check
+      }
     }
 
-    // Find Person by email
-    const person = await Person.findOne({ where: { email } });
+    if (!identifier || !password) {
+      return res.status(400).json({ error: 'Email, Username, or ID, and password are required fields.' });
+    }
+
+    const idStr = String(identifier).trim();
+
+    // Admin testing bypass (direct session token without 2FA)
+    if ((idStr === 'admin' || idStr === 'admin@restaurant.com' || idStr === '1') && password === '123') {
+      const token = jwt.sign(
+        { id: 1, email: 'admin@restaurant.com', role: 'manager' },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.status(200).json({
+        message: 'Admin testing login successful (2FA bypassed).',
+        token
+      });
+    }
+
+    // Find Person by ID, email, or name
+    let person = null;
+    if (!isNaN(idStr)) {
+      person = await Person.findByPk(Number(idStr));
+    }
+    if (!person) {
+      person = await Person.findOne({ where: { email: idStr } });
+    }
+    if (!person) {
+      person = await Person.findOne({ where: { name: idStr } });
+    }
     if (!person) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }

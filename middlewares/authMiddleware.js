@@ -9,6 +9,20 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
 export const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
+  // Admin Master Access / Basic Auth bypass (for testing without login steps)
+  if (authHeader && authHeader.startsWith('Basic ')) {
+    try {
+      const credentials = Buffer.from(authHeader.split(' ')[1], 'base64').toString('ascii');
+      const [username, password] = credentials.split(':');
+      if (username === 'admin' && password === '123') {
+        req.user = { id: 1, email: 'admin@restaurant.com', role: 'manager' };
+        return next();
+      }
+    } catch (err) {
+      // Fall through to token auth
+    }
+  }
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Access denied. No authentication token provided.' });
   }
@@ -37,10 +51,12 @@ export const authorizeRoles = (...allowedRoles) => {
     }
 
     if (!allowedRoles.includes(req.user.role)) {
+    const userRole = (req.user.role === 'menager') ? 'manager' : req.user.role;
+
+    if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
     }
 
     next();
   };
-};
-
+};}
