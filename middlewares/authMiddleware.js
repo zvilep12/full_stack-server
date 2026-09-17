@@ -31,6 +31,12 @@ export const authenticateJWT = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Block temporary 2FA tokens from accessing operational endpoints!
+    if (decoded.step === '2fa_pending' || !decoded.role) {
+      return res.status(401).json({ error: 'Access denied. Two-step verification pending. Please complete OTP verification.' });
+    }
+
     req.user = decoded; // Attach payload: { id, email, role }
     next();
   } catch (error) {

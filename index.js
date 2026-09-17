@@ -19,6 +19,8 @@ app.use('/auth', authRouter);
 app.use('/employees', employeeRouter);
 app.use('/customers', customerRouter);
 app.use('/menu', menuRouter);
+app.use('/orders', orderRouter);
+
 // Error handling middleware (e.g. for malformed JSON)
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
